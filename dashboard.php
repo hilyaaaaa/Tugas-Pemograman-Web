@@ -1,93 +1,134 @@
 <?php
+
 session_start();
-if (!isset($_SESSION['user'])) {
+
+if(!isset($_SESSION['user_id'])){
+
     header("Location: login.php");
-    exit();
+
+    exit;
 }
 
-// Data dummy untuk fungsi READ
-$projects = [
-    ['id' => 1, 'name' => 'Project Kolaborasi Tim A', 'status' => 'Active', 'created' => '2026-03-18'],
-    ['id' => 2, 'name' => 'Desain UI Kolaborasa v2', 'status' => 'Completed', 'created' => '2026-03-15'],
-    ['id' => 3, 'name' => 'Backend API Development', 'status' => 'In Progress', 'created' => '2026-03-20']
-];
+include "koneksi.php";
 
-// Fungsi CREATE sederhana
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_project'])) {
-    $new_project = [
-        'id' => count($projects) + 1,
-        'name' => trim($_POST['project_name']),
-        'status' => 'Active',
-        'created' => date('Y-m-d')
-    ];
-    $projects[] = $new_project;
-}
+$total = mysqli_fetch_assoc(
 
-$user = $_SESSION['user'];
+    mysqli_query(
+        $conn,
+        "SELECT COUNT(*) as total
+         FROM monitoring"
+    )
+
+);
+
+$aman = mysqli_fetch_assoc(
+
+    mysqli_query(
+        $conn,
+        "SELECT COUNT(*) as total
+         FROM monitoring
+         WHERE status_banjir='Aman'"
+    )
+
+);
+
+$waspada = mysqli_fetch_assoc(
+
+    mysqli_query(
+        $conn,
+        "SELECT COUNT(*) as total
+         FROM monitoring
+         WHERE status_banjir='Waspada'"
+    )
+
+);
+
+$bahaya = mysqli_fetch_assoc(
+
+    mysqli_query(
+        $conn,
+        "SELECT COUNT(*) as total
+         FROM monitoring
+         WHERE status_banjir='Bahaya'"
+    )
+
+);
+
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kolaborasa - Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+
+    <title>Dashboard</title>
+
+    <link rel="stylesheet"
+          href="assets/style.css">
+
 </head>
+
 <body>
-    <nav class="navbar">
-        <div class="logo">
-            <a href="#" class="logo-text">Kolaborasa</a>
-        </div>
-        <div class="nav-links">
-            <span>Selamat datang, <?php echo htmlspecialchars($user['name']); ?>!</span>
-            <a href="login.php?logout=1" class="btn-logout">Logout</a>
-        </div>
-    </nav>
 
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>Dashboard Proyek</h1>
-            <p>Kelola proyek kolaborasi tim Anda</p>
+<div class="container">
+
+    <?php include "navbar.php"; ?>
+
+    <h2>
+
+        Halo,
+        <?= $_SESSION['nama']; ?>
+
+    </h2>
+
+    <div class="dashboard">
+
+        <div class="card">
+
+            <h3>Total Monitoring</h3>
+
+            <p>
+                <?= $total['total']; ?>
+            </p>
+
         </div>
 
-        <!-- Form CREATE -->
-        <div class="create-section">
-            <h3>Tambah Proyek Baru</h3>
-            <form method="POST" class="create-form">
-                <input type="text" name="project_name" placeholder="Nama proyek baru" required>
-                <button type="submit" name="create_project" class="btn-create">Buat Proyek</button>
-            </form>
+        <div class="card">
+
+            <h3>Status Aman</h3>
+
+            <p>
+                <?= $aman['total']; ?>
+            </p>
+
         </div>
 
-        <!-- Tabel READ -->
-        <div class="projects-table">
-            <h3>Daftar Proyek (<?php echo count($projects); ?>)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nama Proyek</th>
-                        <th>Status</th>
-                        <th>Dibuat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($projects as $project): ?>
-                    <tr>
-                        <td><?php echo $project['id']; ?></td>
-                        <td><?php echo htmlspecialchars($project['name']); ?></td>
-                        <td>
-                            <span class="status <?php echo $project['status'] === 'Active' ? 'active' : 'completed'; ?>">
-                                <?php echo $project['status']; ?>
-                            </span>
-                        </td>
-                        <td><?php echo $project['created']; ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <div class="card">
+
+            <h3>Status Waspada</h3>
+
+            <p>
+                <?= $waspada['total']; ?>
+            </p>
+
         </div>
+
+        <div class="card">
+
+            <h3>Status Bahaya</h3>
+
+            <p>
+                <?= $bahaya['total']; ?>
+            </p>
+
+        </div>
+
     </div>
+
+</div>
+
 </body>
+
 </html>
+```

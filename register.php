@@ -1,71 +1,50 @@
 <?php
-session_start();
+include "koneksi.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $reg_name = trim($_POST["reg_name"] ?? '');
-    $reg_email = trim($_POST["reg_email"] ?? '');
-    $reg_password = $_POST["reg_password"] ?? '';
-    
-    if (!empty($reg_name) && !empty($reg_email) && !empty($reg_password)) {
-        $_SESSION['temp_register'] = [
-            'name' => $reg_name,
-            'email' => $reg_email
-        ];
-        header("Location: login.php?registered=1");
-        exit();
+if(isset($_POST['register'])){
+
+    $nama = $_POST['nama'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    if(empty($nama) || empty($email) || empty($password)){
+        echo "Semua field wajib diisi";
+    } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        echo "Format email tidak valid";
+    } elseif(strlen($password) < 6){
+        echo "Password minimal 6 karakter";
+    } else {
+
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
+
+        mysqli_query($conn, "INSERT INTO users(nama,email,password)
+        VALUES('$nama','$email','$password_hash')");
+
+        echo "Registrasi berhasil";
     }
-    
-    $reg_error = "Semua field harus diisi!";
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kolaborasa - Register</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Register</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navbar sama seperti login.php -->
-    
-    <div class="container">
-        <div class="login-card">
-            <div class="login-form">
-                <h1>Create Account</h1>
-                <?php if (isset($reg_error)): ?>
-                    <div class="error-message"><?php echo $reg_error; ?></div>
-                <?php endif; ?>
-                
-                <form method="POST" id="registerForm">
-                    <div class="input-group">
-                        <label>Nama Lengkap</label>
-                        <input type="text" name="reg_name" required placeholder="Nama Anda">
-                    </div>
-                    <div class="input-group">
-                        <label>Email</label>
-                        <input type="email" name="reg_email" required placeholder="email@contoh.com">
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" name="reg_password" required placeholder="Kata sandi">
-                    </div>
-                    <button type="submit" class="btn-login">Register</button>
-                </form>
-                <p class="signup-text">Already have an Account? <a href="login.php">Login</a></p>
-            </div>
-            <div class="login-image"></div>
-        </div>
-    </div>
-    
-    <hr class="footer-divider">
 
-    <div class="footer-bottom">
-        <p class="copyright">© 2025 Kolaborasa Inc. All rights reserved.</p>
-        <div class="social-icons">
-        </div>
-    </div>
-    </footer>
+<h2>Register</h2>
+
+<form method="POST">
+    <input type="text" name="nama" placeholder="Nama"><br><br>
+    <input type="email" name="email" placeholder="Email"><br><br>
+    <input type="password" name="password" placeholder="Password"><br><br>
+
+    <button type="submit" name="register">Register</button>
+</form>
+
+<a href="login.php">Login</a>
+
 </body>
 </html>
